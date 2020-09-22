@@ -107,14 +107,24 @@ if ~isempty(pr.LowerLimit)
 end
 
 if size(stepbounds, 2) > 1
-    %message = '';
-    [message, params, params_err, res.nll2, res.errmat, ep, en] = ...
-        evalc("fminuit('minuit_passfunc', initp, 'b', '-c', pr.command, '-s', stepbounds, passdata);");
+
+    if ismac
+        [message, params, params_err, res.nll2, res.errmat, ep, en] = ...
+            evalc("fminuit('minuit_passfunc', initp, 'b', '-c', pr.command, '-s', stepbounds, passdata);");
+    else
+        [message, params, params_err, res.nll2, res.errmat] = ...
+            evalc("fminuit('minuit_passfunc', initp, 'b', '-c', pr.command, '-s', stepbounds, passdata);");
+    end
 %    [params, params_err, res.nll2, res.errmat, ep, en] = ...
 %        fminuit('minuit_passfunc', initp, 'b', '-c', pr.command, '-s', stepbounds, passdata);
 else
-    [message, params, params_err, res.nll2, res.errmat, ep, en] = ...
-        evalc("fminuit('minuit_passfunc', initp, 'b', '-c', pr.command, passdata);");
+    if ismac
+        [message, params, params_err, res.nll2, res.errmat, ep, en] = ...
+            evalc("fminuit('minuit_passfunc', initp, 'b', '-c', pr.command, passdata);");
+    else
+        [message, params, params_err, res.nll2, res.errmat] = ...
+            evalc("fminuit('minuit_passfunc', initp, 'b', '-c', pr.command, passdata);");
+    end
 end
 
 res.p = ErrorNum(params, params_err);
@@ -130,8 +140,10 @@ end
 res.passdata = passdata;
 res.rednll2 = res.nll2 / res.dof;
 res.rednll2sig = redchi2sig(res.rednll2, res.dof);
-res.params_err_pos = ep; % saving the assymetric errors
-res.params_err_neg = en;
+if ismac
+    res.params_err_pos = ep; % saving the assymetric errors
+    res.params_err_neg = en;
+end
 res.message = message;
 
 
